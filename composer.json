@@ -1,42 +1,44 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "vendor_slug/package_slug",
-    "description": "package_description",
-    "homepage": "https://github.com/vendor_slug/package_slug",
+    "name": "juniorfontenele/laravel-permission",
+    "description": "RBAC + scoped permissions (all/self/attached) for Laravel",
+    "homepage": "https://github.com/juniorfontenele/laravel-permission",
     "type": "library",
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "VendorName\\PackageName\\": "src/"
+            "JuniorFontenele\\LaravelPermission\\": "src/"
         }
     },
     "authors": [
         {
-            "name": "author_name",
-            "email": "author_email@authordomain.com"
+            "name": "Junior Fontenele",
+            "email": "git@juniorfontenele.com.br"
         }
     ],
     "require": {
         "php": "^8.4",
-        "illuminate/support": "^12",
-        "illuminate/contracts": "^12"
+        "illuminate/support": "^12.0",
+        "illuminate/contracts": "^12.0",
+        "illuminate/database": "^12.0",
+        "illuminate/auth": "^12.0"
     },
     "extra": {
         "laravel": {
             "providers": [
-                "VendorName\\PackageName\\PackageNameServiceProvider"
+                "JuniorFontenele\\LaravelPermission\\LaravelPermissionServiceProvider"
             ],
             "aliases": {
-                "PackageName": "VendorName\\PackageName\\Facades\\PackageName"
+                "Permission": "JuniorFontenele\\LaravelPermission\\Facades\\Permission"
             },
             "branch-alias": {
-                "dev-main": "1.x-dev",
-                "dev-master": "1.x-dev"
+                "dev-main": "0.x-dev"
             }
         }
     },
     "require-dev": {
         "orchestra/testbench": "^10.8",
+        "laravel/framework": "^12.0",
         "laravel/prompts": "^0.3.9",
         "larastan/larastan": "^3.0",
         "laravel/pint": "^1.27",

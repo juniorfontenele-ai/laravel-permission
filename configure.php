@@ -45,23 +45,23 @@ function guessGitEmail(): ?string
     return $email ?: null;
 }
 
-function guessVendorName(): ?string
+function guessJuniorFontenele(): ?string
 {
     $name = guessGitUser();
 
-    return $name ? Str::studly($name) : 'VendorName';
+    return $name ? Str::studly($name) : 'JuniorFontenele';
 }
 
-function guessPackageName(): ?string
+function guessLaravelPermission(): ?string
 {
-    $name = basename(getcwd()) !== '.' ? basename(getcwd()) : 'PackageName';
+    $name = basename(getcwd()) !== '.' ? basename(getcwd()) : 'LaravelPermission';
 
     return Str::studly($name);
 }
 
 function listFilesToReplace(): array
 {
-    return explode(PHP_EOL, run('grep -E -r -l -i "author_name|author_email@authordomain.com|vendor_slug|package_slug|VendorName|PackageName|" --exclude-dir=vendor --exclude-dir=.git ./* ./.github/* | grep -v ' . basename(__FILE__)));
+    return explode(PHP_EOL, run('grep -E -r -l -i "Junior Fontenele|git@juniorfontenele.com.br|juniorfontenele|laravel-permission|JuniorFontenele|LaravelPermission|" --exclude-dir=vendor --exclude-dir=.git ./* ./.github/* | grep -v ' . basename(__FILE__)));
 }
 
 function replace_in_file(string $file, array $replacements): void
@@ -94,16 +94,16 @@ $authorEmail = text(
 
 $vendorName = text(
     label: 'Vendor Name',
-    placeholder: 'VendorName',
+    placeholder: 'JuniorFontenele',
     required: true,
-    default: guessVendorName(),
+    default: guessJuniorFontenele(),
 );
 
 $packageName = text(
     label: 'Package Name',
-    placeholder: 'PackageName',
+    placeholder: 'LaravelPermission',
     required: true,
-    default: guessPackageName(),
+    default: guessLaravelPermission(),
 );
 
 $vendorSlug = text(
@@ -146,20 +146,20 @@ $files = listFilesToReplace();
 
 foreach ($files as $file) {
     replace_in_file($file, [
-        'author_name' => $author,
-        'author_email@authordomain.com' => $authorEmail,
-        'vendor_slug' => $vendorSlug,
-        'package_slug' => $packageSlug,
-        'VendorName' => $vendorName,
-        'PackageName' => $packageName,
-        'package_description' => $packageDescription,
+        'Junior Fontenele' => $author,
+        'git@juniorfontenele.com.br' => $authorEmail,
+        'juniorfontenele' => $vendorSlug,
+        'laravel-permission' => $packageSlug,
+        'JuniorFontenele' => $vendorName,
+        'LaravelPermission' => $packageName,
+        'RBAC + scoped permissions (all/self/attached) for Laravel' => $packageDescription,
     ]);
 
     match (true) {
-        str_contains($file, 'config/package_slug.php') => rename($file, str_replace('package_slug', $packageSlug, $file)),
-        str_contains($file, 'src/PackageNameServiceProvider.php') => rename($file, str_replace('PackageName', $packageName, $file)),
-        str_contains($file, 'src/Facades/PackageName.php') => rename($file, str_replace('PackageName', $packageName, $file)),
-        str_contains($file, 'src/PackageName.php') => rename($file, str_replace('PackageName', $packageName, $file)),
+        str_contains($file, 'config/laravel-permission.php') => rename($file, str_replace('laravel-permission', $packageSlug, $file)),
+        str_contains($file, 'src/LaravelPermissionServiceProvider.php') => rename($file, str_replace('LaravelPermission', $packageName, $file)),
+        str_contains($file, 'src/Facades/LaravelPermission.php') => rename($file, str_replace('LaravelPermission', $packageName, $file)),
+        str_contains($file, 'src/LaravelPermission.php') => rename($file, str_replace('LaravelPermission', $packageName, $file)),
         default => null,
     };
 }
