@@ -32,7 +32,9 @@ php artisan migrate
 
 - `models.permission|role|attachment`: trocar os models Eloquent
 - `tables.*`: trocar nome das tabelas
-- `tenant_resolver`: callback para pegar `tenant_id` atual (nullable = single tenant)
+- `tenancy.enabled`: feature flag de multi-tenancy (default: `true`)
+- `tenancy.column`: nome da coluna de tenant (default: `tenant_id`)
+- `tenant_resolver`: callback para pegar o tenant id atual (nullable)
 - `self_resolver`: callback para definir o que é "self"
 
 ### Default self
@@ -102,13 +104,16 @@ Permission::attach($user, 'companies.edit.attached', $company);
 $user->can('companies.edit.attached', $company); // true
 ```
 
-## Multi-tenancy (futuro / preparado)
+## Multi-tenancy
 
-As tabelas já possuem `tenant_id` **nullable** (single-tenant mode).
+O suporte a multi-tenancy é um **feature flag**:
 
-Quando você ativar multi-tenant, basta:
-- fornecer `tenant_resolver` no config
-- e passar `tenantId` nas APIs (`assignRole`, `givePermissionTo`, etc.) quando quiser forçar.
+- `permission.tenancy.enabled = true`: cria/usa coluna de tenant nas tabelas (migrations + queries)
+- `permission.tenancy.enabled = false`: ignora tenant completamente e **não** cria a coluna
+
+A coluna é configurável via `permission.tenancy.column` (default: `tenant_id`).
+
+Para ativar scoping por tenant, defina `permission.tenant_resolver` no config (ou passe explicitamente `tenantId` nas APIs).
 
 ## Testes
 
