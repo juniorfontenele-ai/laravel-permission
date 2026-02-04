@@ -9,6 +9,10 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use JuniorFontenele\LaravelPermission\Contracts\AbilityParser as AbilityParserContract;
 use JuniorFontenele\LaravelPermission\Contracts\AuthorizationService as AuthorizationServiceContract;
+use JuniorFontenele\LaravelPermission\Resolvers\ConfigSelfResolver;
+use JuniorFontenele\LaravelPermission\Resolvers\ConfigTenantResolver;
+use JuniorFontenele\LaravelPermission\Resolvers\SelfResolver;
+use JuniorFontenele\LaravelPermission\Resolvers\TenantResolver;
 use JuniorFontenele\LaravelPermission\Support\DefaultAbilityParser;
 use JuniorFontenele\LaravelPermission\Support\PermissionManager;
 use JuniorFontenele\LaravelPermission\Support\PermissionRegistrar;
@@ -31,14 +35,20 @@ final class LaravelPermissionServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(PermissionManager::class, function ($app) {
-            return new PermissionManager(
+        // Entry point / Facade target
+        $this->app->singleton(Permission::class, function ($app) {
+            return new Permission(
                 permissions: $app->make(PermissionStore::class),
                 roles: $app->make(RoleStore::class),
             );
         });
 
-        $this->app->singleton(Permission::class, fn ($app) => $app->make(PermissionManager::class));
+        // Keep PermissionManager as an alias for the entry point so both resolve the same instance.
+        $this->app->alias(Permission::class, PermissionManager::class);
+
+        // Default resolvers (overridable by consumer apps)
+        $this->app->singleton(TenantResolver::class, ConfigTenantResolver::class);
+        $this->app->singleton(SelfResolver::class, ConfigSelfResolver::class);
 
         $this->app->bind(AbilityParserContract::class, DefaultAbilityParser::class);
 

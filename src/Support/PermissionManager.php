@@ -9,10 +9,10 @@ use JuniorFontenele\LaravelPermission\Contracts\AuthorizationService as Authoriz
 use JuniorFontenele\LaravelPermission\Evaluators\AllScopeEvaluator;
 use JuniorFontenele\LaravelPermission\Evaluators\AttachedScopeEvaluator;
 use JuniorFontenele\LaravelPermission\Evaluators\SelfScopeEvaluator;
-use JuniorFontenele\LaravelPermission\Resolvers\ConfigSelfResolver;
-use JuniorFontenele\LaravelPermission\Resolvers\ConfigTenantResolver;
+use JuniorFontenele\LaravelPermission\Resolvers\SelfResolver;
+use JuniorFontenele\LaravelPermission\Resolvers\TenantResolver;
 
-final class PermissionManager
+class PermissionManager
 {
     public function __construct(
         private PermissionStore $permissions,
@@ -26,8 +26,8 @@ final class PermissionManager
 
         return new PermissionAuthorizationService(
             abilityParser: app(\JuniorFontenele\LaravelPermission\Contracts\AbilityParser::class),
-            tenantResolver: new ConfigTenantResolver(),
-            selfResolver: new ConfigSelfResolver(),
+            tenantResolver: app(TenantResolver::class),
+            selfResolver: app(SelfResolver::class),
             all: new AllScopeEvaluator($checker),
             self: new SelfScopeEvaluator($checker),
             attached: new AttachedScopeEvaluator($checker),
