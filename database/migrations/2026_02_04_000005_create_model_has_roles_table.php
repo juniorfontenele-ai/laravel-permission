@@ -14,15 +14,25 @@ return new class extends Migration
         Schema::create(PermissionConfig::table('model_has_roles'), function (Blueprint $table) {
             $table->unsignedBigInteger('role_id');
 
-            $table->unsignedBigInteger('tenant_id')->nullable();
+            if (PermissionConfig::tenancyEnabled()) {
+                $table->unsignedBigInteger(PermissionConfig::tenantColumn())->nullable();
+            }
 
             $table->string('model_type');
             $table->unsignedBigInteger('model_id');
 
             $table->index(['model_id', 'model_type']);
-            $table->index(['tenant_id']);
 
-            $table->primary(['role_id', 'tenant_id', 'model_id', 'model_type'], 'model_has_roles_primary');
+            if (PermissionConfig::tenancyEnabled()) {
+                $table->index([PermissionConfig::tenantColumn()]);
+
+                $table->primary(
+                    ['role_id', PermissionConfig::tenantColumn(), 'model_id', 'model_type'],
+                    'model_has_roles_primary'
+                );
+            } else {
+                $table->primary(['role_id', 'model_id', 'model_type'], 'model_has_roles_primary');
+            }
 
             $table->foreign('role_id')
                 ->references('id')

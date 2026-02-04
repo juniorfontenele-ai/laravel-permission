@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create(PermissionConfig::table('permission_attachments'), function (Blueprint $table) {
             $table->bigIncrements('id');
 
-            $table->unsignedBigInteger('tenant_id')->nullable();
+            if (PermissionConfig::tenancyEnabled()) {
+                $table->unsignedBigInteger(PermissionConfig::tenantColumn())->nullable();
+            }
 
             $table->unsignedBigInteger('permission_id');
 
@@ -28,16 +30,27 @@ return new class extends Migration
 
             $table->index(['subject_id', 'subject_type']);
             $table->index(['resource_id', 'resource_type']);
-            $table->index(['tenant_id']);
 
-            $table->unique([
-                'tenant_id',
-                'permission_id',
-                'subject_type',
-                'subject_id',
-                'resource_type',
-                'resource_id',
-            ], 'permission_attachments_unique');
+            if (PermissionConfig::tenancyEnabled()) {
+                $table->index([PermissionConfig::tenantColumn()]);
+
+                $table->unique([
+                    PermissionConfig::tenantColumn(),
+                    'permission_id',
+                    'subject_type',
+                    'subject_id',
+                    'resource_type',
+                    'resource_id',
+                ], 'permission_attachments_unique');
+            } else {
+                $table->unique([
+                    'permission_id',
+                    'subject_type',
+                    'subject_id',
+                    'resource_type',
+                    'resource_id',
+                ], 'permission_attachments_unique');
+            }
 
             $table->foreign('permission_id')
                 ->references('id')
