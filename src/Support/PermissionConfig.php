@@ -63,7 +63,7 @@ final class PermissionConfig
 
     private static function assertValidIdentifier(string $value, string $configKey): void
     {
-        if (! preg_match('/\A\w+\z/', $value)) {
+        if (! preg_match('/\A[A-Za-z0-9_]+\z/', $value)) {
             throw new InvalidArgumentException(
                 "Invalid permission table/column name for config [$configKey]: [$value]. "
                 . 'Only letters, numbers, and underscore are allowed.'
