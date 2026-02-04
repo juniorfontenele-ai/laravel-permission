@@ -12,27 +12,36 @@ final class PermissionAttachment
     {
         $attachmentClass = PermissionConfig::modelClass('attachment');
 
-        $attachmentClass::query()->firstOrCreate([
-            'tenant_id' => $tenantId,
+        $attributes = [
             'permission_id' => $permissionId,
             'subject_type' => $user::class,
             'subject_id' => (int) $user->getAuthIdentifier(),
             'resource_type' => $resource::class,
             'resource_id' => (int) $resource->getKey(),
-        ]);
+        ];
+
+        if (PermissionConfig::tenancyEnabled()) {
+            $attributes[PermissionConfig::tenantColumn()] = $tenantId;
+        }
+
+        $attachmentClass::query()->firstOrCreate($attributes);
     }
 
     public static function exists(Authenticatable $user, int $permissionId, object $resource, ?int $tenantId = null): bool
     {
         $attachmentClass = PermissionConfig::modelClass('attachment');
 
-        return $attachmentClass::query()
-            ->where('tenant_id', $tenantId)
+        $query = $attachmentClass::query()
             ->where('permission_id', $permissionId)
             ->where('subject_type', $user::class)
             ->where('subject_id', (int) $user->getAuthIdentifier())
             ->where('resource_type', $resource::class)
-            ->where('resource_id', (int) $resource->getKey())
-            ->exists();
+            ->where('resource_id', (int) $resource->getKey());
+
+        if (PermissionConfig::tenancyEnabled()) {
+            $query->where(PermissionConfig::tenantColumn(), $tenantId);
+        }
+
+        return $query->exists();
     }
 }

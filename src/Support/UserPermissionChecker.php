@@ -41,24 +41,42 @@ final class UserPermissionChecker
         $roleHasPermissions = PermissionConfig::table('role_has_permissions');
 
         // Direct permission
-        $direct = DB::table($modelHasPermissions)
+        $directQuery = DB::table($modelHasPermissions)
             ->where('permission_id', $permissionId)
             ->where('model_type', $userType)
-            ->where('model_id', $userId)
-            ->when($tenantId !== null, fn ($q) => $q->where('tenant_id', $tenantId), fn ($q) => $q->whereNull('tenant_id'))
-            ->exists();
+            ->where('model_id', $userId);
 
-        if ($direct) {
+        if (PermissionConfig::tenancyEnabled()) {
+            $tenantColumn = PermissionConfig::tenantColumn();
+
+            $directQuery->when(
+                $tenantId !== null,
+                fn ($q) => $q->where($tenantColumn, $tenantId),
+                fn ($q) => $q->whereNull($tenantColumn)
+            );
+        }
+
+        if ($directQuery->exists()) {
             return true;
         }
 
         // Permission via roles
-        return DB::table($modelHasRoles)
+        $roleQuery = DB::table($modelHasRoles)
             ->join($roleHasPermissions, "$modelHasRoles.role_id", '=', "$roleHasPermissions.role_id")
             ->where("$roleHasPermissions.permission_id", $permissionId)
             ->where("$modelHasRoles.model_type", $userType)
-            ->where("$modelHasRoles.model_id", $userId)
-            ->when($tenantId !== null, fn ($q) => $q->where("$modelHasRoles.tenant_id", $tenantId), fn ($q) => $q->whereNull("$modelHasRoles.tenant_id"))
-            ->exists();
+            ->where("$modelHasRoles.model_id", $userId);
+
+        if (PermissionConfig::tenancyEnabled()) {
+            $tenantColumn = PermissionConfig::tenantColumn();
+
+            $roleQuery->when(
+                $tenantId !== null,
+                fn ($q) => $q->where("$modelHasRoles.$tenantColumn", $tenantId),
+                fn ($q) => $q->whereNull("$modelHasRoles.$tenantColumn")
+            );
+        }
+
+        return $roleQuery->exists();
     }
 }

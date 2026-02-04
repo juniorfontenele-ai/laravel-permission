@@ -7,3 +7,7 @@ parameters:
 
     paths:
         - src/
+
+    ignoreErrors:
+        # This package exposes traits for consumers; they may not be used inside this repo.
+        - identifier: trait.unused

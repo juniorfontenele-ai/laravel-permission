@@ -12,11 +12,16 @@ final class RoleStore
     {
         $class = PermissionConfig::modelClass('role');
 
-        return $class::query()->firstOrCreate([
-            'tenant_id' => $tenantId,
+        $attributes = [
             'name' => $name,
             'guard_name' => $guardName,
-        ]);
+        ];
+
+        if (PermissionConfig::tenancyEnabled()) {
+            $attributes[PermissionConfig::tenantColumn()] = $tenantId;
+        }
+
+        return $class::query()->firstOrCreate($attributes);
     }
 
     public function findByName(string $name, ?int $tenantId = null, string $guardName = 'web'): ?Model
@@ -24,7 +29,10 @@ final class RoleStore
         $class = PermissionConfig::modelClass('role');
 
         return $class::query()
-            ->where('tenant_id', $tenantId)
+            ->when(
+                PermissionConfig::tenancyEnabled(),
+                fn ($q) => $q->where(PermissionConfig::tenantColumn(), $tenantId),
+            )
             ->where('name', $name)
             ->where('guard_name', $guardName)
             ->first();

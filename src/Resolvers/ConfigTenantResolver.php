@@ -8,6 +8,10 @@ final class ConfigTenantResolver implements TenantResolver
 {
     public function resolveTenantId(): ?int
     {
+        if (! \JuniorFontenele\LaravelPermission\Support\PermissionConfig::tenancyEnabled()) {
+            return null;
+        }
+
         /** @var callable|null $resolver */
         $resolver = config('permission.tenant_resolver');
 

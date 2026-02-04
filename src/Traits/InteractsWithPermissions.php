@@ -21,6 +21,7 @@ trait InteractsWithPermissions
     public function assignRole(string $roleName, ?int $tenantId = null, string $guardName = 'web'): void
     {
         $tenantId ??= app(TenantResolver::class)->resolveTenantId();
+        $tenantId = PermissionConfig::tenancyEnabled() ? $tenantId : null;
 
         /** @var RoleStore $roles */
         $roles = app(RoleStore::class);
@@ -40,6 +41,7 @@ trait InteractsWithPermissions
     public function removeRole(string $roleName, ?int $tenantId = null, string $guardName = 'web'): void
     {
         $tenantId ??= app(TenantResolver::class)->resolveTenantId();
+        $tenantId = PermissionConfig::tenancyEnabled() ? $tenantId : null;
 
         /** @var RoleStore $roles */
         $roles = app(RoleStore::class);
@@ -64,6 +66,7 @@ trait InteractsWithPermissions
     public function syncRoles(array $roleNames, ?int $tenantId = null, string $guardName = 'web'): void
     {
         $tenantId ??= app(TenantResolver::class)->resolveTenantId();
+        $tenantId = PermissionConfig::tenancyEnabled() ? $tenantId : null;
 
         /** @var RoleStore $roles */
         $roles = app(RoleStore::class);
@@ -87,16 +90,23 @@ trait InteractsWithPermissions
     public function hasRole(string $roleName, ?int $tenantId = null, string $guardName = 'web'): bool
     {
         $tenantId ??= app(TenantResolver::class)->resolveTenantId();
+        $tenantId = PermissionConfig::tenancyEnabled() ? $tenantId : null;
 
-        return $this->roles()
+        $query = $this->roles()
             ->where('name', $roleName)
-            ->where('guard_name', $guardName)
-            ->when(
+            ->where('guard_name', $guardName);
+
+        if (PermissionConfig::tenancyEnabled()) {
+            $tenantColumn = PermissionConfig::tenantColumn();
+
+            $query->when(
                 $tenantId !== null,
-                fn ($q) => $q->wherePivot('tenant_id', $tenantId),
-                fn ($q) => $q->whereNull(PermissionConfig::table('model_has_roles') . '.tenant_id')
-            )
-            ->exists();
+                fn ($q) => $q->wherePivot($tenantColumn, $tenantId),
+                fn ($q) => $q->whereNull(PermissionConfig::table('model_has_roles') . ".{$tenantColumn}")
+            );
+        }
+
+        return $query->exists();
     }
 
     // --- Permissions ----------------------------------------------------
@@ -104,6 +114,7 @@ trait InteractsWithPermissions
     public function givePermissionTo(string $permissionName, ?int $tenantId = null, string $guardName = 'web'): void
     {
         $tenantId ??= app(TenantResolver::class)->resolveTenantId();
+        $tenantId = PermissionConfig::tenancyEnabled() ? $tenantId : null;
 
         /** @var PermissionStore $permissions */
         $permissions = app(PermissionStore::class);
@@ -123,6 +134,7 @@ trait InteractsWithPermissions
     public function revokePermissionTo(string $permissionName, ?int $tenantId = null): void
     {
         $tenantId ??= app(TenantResolver::class)->resolveTenantId();
+        $tenantId = PermissionConfig::tenancyEnabled() ? $tenantId : null;
 
         /** @var PermissionStore $permissions */
         $permissions = app(PermissionStore::class);
@@ -147,6 +159,7 @@ trait InteractsWithPermissions
     public function syncPermissions(array $permissionNames, ?int $tenantId = null, string $guardName = 'web'): void
     {
         $tenantId ??= app(TenantResolver::class)->resolveTenantId();
+        $tenantId = PermissionConfig::tenancyEnabled() ? $tenantId : null;
 
         /** @var PermissionStore $permissions */
         $permissions = app(PermissionStore::class);
@@ -170,6 +183,7 @@ trait InteractsWithPermissions
     public function hasPermissionTo(string $permissionName, ?int $tenantId = null): bool
     {
         $tenantId ??= app(TenantResolver::class)->resolveTenantId();
+        $tenantId = PermissionConfig::tenancyEnabled() ? $tenantId : null;
 
         $checker = new UserPermissionChecker(app(PermissionStore::class));
 

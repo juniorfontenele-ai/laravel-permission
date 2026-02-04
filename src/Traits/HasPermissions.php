@@ -13,12 +13,18 @@ trait HasPermissions
     {
         $permissionClass = PermissionConfig::modelClass('permission');
 
-        return $this->morphToMany(
+        $relation = $this->morphToMany(
             $permissionClass,
             'model',
             PermissionConfig::table('model_has_permissions'),
             'model_id',
             'permission_id'
-        )->withPivot('tenant_id');
+        );
+
+        if (PermissionConfig::tenancyEnabled()) {
+            $relation->withPivot(PermissionConfig::tenantColumn());
+        }
+
+        return $relation;
     }
 }

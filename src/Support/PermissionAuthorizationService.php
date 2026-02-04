@@ -29,7 +29,7 @@ final class PermissionAuthorizationService implements AuthorizationService
     {
         $parsed = $this->abilityParser->parse($ability);
 
-        if (! $parsed) {
+        if (! $parsed instanceof ParsedAbility) {
             return null;
         }
 

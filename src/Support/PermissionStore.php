@@ -8,17 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 
 final class PermissionStore
 {
-    /** @return \JuniorFontenele\LaravelPermission\Models\Permission */
-    private function model(): Model
+    /** @return class-string<Model> */
+    private function modelClass(): string
     {
+        /** @var class-string<Model> $class */
         $class = PermissionConfig::modelClass('permission');
 
-        return new $class();
+        return $class;
     }
 
     public function findOrCreate(string $name, string $guardName = 'web'): Model
     {
-        $class = PermissionConfig::modelClass('permission');
+        $class = $this->modelClass();
 
         return $class::query()->firstOrCreate([
             'name' => $name,
@@ -29,7 +30,7 @@ final class PermissionStore
 
     public function findByName(string $name): ?Model
     {
-        $class = PermissionConfig::modelClass('permission');
+        $class = $this->modelClass();
 
         return $class::query()->where('name', $name)->first();
     }

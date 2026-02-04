@@ -14,14 +14,20 @@ return new class extends Migration
         Schema::create(PermissionConfig::table('roles'), function (Blueprint $table) {
             $table->bigIncrements('id');
 
-            // nullable for single-tenant; once multi-tenancy is enabled, you can enforce not-null.
-            $table->unsignedBigInteger('tenant_id')->nullable();
+            if (PermissionConfig::tenancyEnabled()) {
+                // nullable for single-tenant; once multi-tenancy is enabled, you can enforce not-null.
+                $table->unsignedBigInteger(PermissionConfig::tenantColumn())->nullable();
+            }
 
             $table->string('name');
             $table->string('guard_name')->default('web');
             $table->timestamps();
 
-            $table->unique(['tenant_id', 'name', 'guard_name']);
+            if (PermissionConfig::tenancyEnabled()) {
+                $table->unique([PermissionConfig::tenantColumn(), 'name', 'guard_name']);
+            } else {
+                $table->unique(['name', 'guard_name']);
+            }
         });
     }
 

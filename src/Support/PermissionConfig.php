@@ -6,6 +6,19 @@ namespace JuniorFontenele\LaravelPermission\Support;
 
 final class PermissionConfig
 {
+    public static function tenancyEnabled(): bool
+    {
+        return (bool) config('permission.tenancy.enabled', true);
+    }
+
+    public static function tenantColumn(): string
+    {
+        /** @var string $column */
+        $column = config('permission.tenancy.column', 'tenant_id');
+
+        return $column;
+    }
+
     public static function modelClass(string $key): string
     {
         /** @var string $class */

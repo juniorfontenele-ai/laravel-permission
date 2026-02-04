@@ -28,15 +28,12 @@ final class LaravelPermissionServiceProvider extends ServiceProvider
         $this->app->singleton(PermissionStore::class);
         $this->app->singleton(RoleStore::class);
 
-        $this->app->singleton(PermissionRegistrar::class, function ($app) {
-            return new PermissionRegistrar(
-                permissions: $app->make(PermissionStore::class),
-                roles: $app->make(RoleStore::class),
-            );
+        $this->app->singleton(function ($app): PermissionRegistrar {
+            return new PermissionRegistrar();
         });
 
         // Entry point / Facade target
-        $this->app->singleton(Permission::class, function ($app) {
+        $this->app->singleton(function ($app): Permission {
             return new Permission(
                 permissions: $app->make(PermissionStore::class),
                 roles: $app->make(RoleStore::class),
@@ -52,7 +49,7 @@ final class LaravelPermissionServiceProvider extends ServiceProvider
 
         $this->app->bind(AbilityParserContract::class, DefaultAbilityParser::class);
 
-        $this->app->bind(AuthorizationServiceContract::class, function ($app) {
+        $this->app->bind(function ($app): AuthorizationServiceContract {
             return $app->make(PermissionManager::class)->authorizationService();
         });
     }
