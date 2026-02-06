@@ -1,8 +1,19 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "juniorfontenele/laravel-permission",
+    "name": "jftecnologia/laravel-permission",
     "description": "RBAC + scoped permissions (all/self/attached) for Laravel",
-    "homepage": "https://github.com/juniorfontenele/laravel-permission",
+    "keywords": [
+        "laravel",
+        "permissions",
+        "roles",
+        "rbac",
+        "authorization",
+        "scopes",
+        "gates",
+        "multi-tenancy",
+        "laravel-package"
+    ],
+    "homepage": "https://github.com/jftecnologia/laravel-permission",
     "type": "library",
     "license": "MIT",
     "autoload": {

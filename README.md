@@ -1,51 +1,62 @@
-# juniorfontenele/laravel-permission
+# Laravel Permission
 
-RBAC para Laravel no estilo **spatie/laravel-permission**, mas com suporte nativo a **scopes** por ability:
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/jftecnologia/laravel-permission.svg?style=flat-square)](https://packagist.org/packages/jftecnologia/laravel-permission)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/jftecnologia/laravel-permission/tests.yml?branch=master&label=tests&style=flat-square)](https://github.com/jftecnologia/laravel-permission/actions?query=workflow%3Atests+branch%3Amaster)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/jftecnologia/laravel-permission/fix-php-code-style.yml?branch=master&label=code%20style&style=flat-square)](https://github.com/jftecnologia/laravel-permission/actions?query=workflow%3A"fix-php-code-style-issues"+branch%3Amaster)
+[![Total Downloads](https://img.shields.io/packagist/dt/jftecnologia/laravel-permission.svg?style=flat-square)](https://packagist.org/packages/jftecnologia/laravel-permission)
 
-- `*.all` (acesso total)
-- `*.self` (acesso somente ao próprio recurso, via resolver)
-- `*.attached` (acesso somente aos recursos anexados/permitidos explicitamente)
+RBAC for Laravel with scoped permissions (`all`, `self`, `attached`) and optional multi-tenancy support.
 
-> **Modelo 1:1:** a *ability string* do Gate é **o nome da permission** (ex.: `companies.edit.attached` == `permissions.name`).
+> **1:1 model:** the Gate ability string equals the permission name (e.g. `companies.edit.attached` == `permissions.name`).
 
-## Instalação
+## Features
+
+- **Scoped permissions** with `all`, `self`, and `attached` scopes
+- **Roles and permissions** with a familiar API
+- **Attachment-based access** for fine-grained authorization
+- **Optional multi-tenancy** via a feature flag
+- **Configurable resolvers** for tenant and self resolution
+
+## Installation
 
 ```bash
-composer require juniorfontenele/laravel-permission
+composer require jftecnologia/laravel-permission
 ```
 
-Publique config (opcional):
+Publish config (optional):
 
 ```bash
 php artisan vendor:publish --tag="permission-config"
 ```
 
-Rode as migrations:
+Run the migrations:
 
 ```bash
 php artisan migrate
 ```
 
-## Configuração
+## Configuration
 
 `config/permission.php`:
 
-- `models.permission|role|attachment`: trocar os models Eloquent
-- `tables.*`: trocar nome das tabelas
-- `tenancy.enabled`: feature flag de multi-tenancy (default: `true`)
-- `tenancy.column`: nome da coluna de tenant (default: `tenant_id`)
-- `tenant_resolver`: callback para pegar o tenant id atual (nullable)
-- `self_resolver`: callback para definir o que é "self"
+- `models.permission|role|attachment`: swap the Eloquent models
+- `tables.*`: rename tables
+- `tenancy.enabled`: feature flag for multi-tenancy (default: `true`)
+- `tenancy.column`: tenant column name (default: `tenant_id`)
+- `tenant_resolver`: callback to resolve the current tenant id (nullable)
+- `self_resolver`: callback to define what "self" means
 
 ### Default self
-Se você não definir `self_resolver`, o pacote usa a convenção:
+
+If you don't define `self_resolver`, the package uses the convention:
 
 - `resource->created_by == user->id`
 
-## Uso
+## Usage
 
-### 1) No seu User
-Adicione o trait:
+### 1) On your User model
+
+Add the trait:
 
 ```php
 use JuniorFontenele\LaravelPermission\Traits\InteractsWithPermissions;
@@ -56,21 +67,23 @@ class User extends Authenticatable
 }
 ```
 
-### 2) Criar e atribuir permissions
-As permissions são strings únicas (campo `permissions.name` é **unique**):
+### 2) Create and assign permissions
+
+Permissions are unique strings (`permissions.name` is **unique**):
 
 ```php
 $user->givePermissionTo('companies.edit.all');
 ```
 
 ### 3) Roles
+
 ```php
 $user->assignRole('editor');
 $user->syncRoles(['editor', 'viewer']);
 $user->removeRole('viewer');
 ```
 
-Permissão via Role:
+Permission via role:
 
 ```php
 $role = \JuniorFontenele\LaravelPermission\Models\Role::query()->firstOrCreate([
@@ -90,9 +103,9 @@ $user->can('companies.edit.self', $company);
 $user->can('companies.edit.attached', $company);
 ```
 
-- `all`: checa só RBAC
-- `self`: RBAC + self_resolver
-- `attached`: RBAC + registro em `permission_attachments`
+- `all`: checks RBAC only
+- `self`: RBAC + `self_resolver`
+- `attached`: RBAC + `permission_attachments` record
 
 ### 5) Attachments (attached scope)
 
@@ -106,17 +119,25 @@ $user->can('companies.edit.attached', $company); // true
 
 ## Multi-tenancy
 
-O suporte a multi-tenancy é um **feature flag**:
+Multi-tenancy support is a **feature flag**:
 
-- `permission.tenancy.enabled = true`: cria/usa coluna de tenant nas tabelas (migrations + queries)
-- `permission.tenancy.enabled = false`: ignora tenant completamente e **não** cria a coluna
+- `permission.tenancy.enabled = true`: creates/uses tenant column in tables (migrations + queries)
+- `permission.tenancy.enabled = false`: ignores tenant entirely and **does not** create the column
 
-A coluna é configurável via `permission.tenancy.column` (default: `tenant_id`).
+The column is configurable via `permission.tenancy.column` (default: `tenant_id`).
 
-Para ativar scoping por tenant, defina `permission.tenant_resolver` no config (ou passe explicitamente `tenantId` nas APIs).
+To enable tenant scoping, define `permission.tenant_resolver` in config (or pass `tenantId` explicitly in APIs).
 
-## Testes
+## Testing
 
 ```bash
 composer test
 ```
+
+## Credits
+
+- [Junior Fontenele](https://github.com/juniorfontenele)
+
+## License
+
+MIT License. See [LICENSE.md](LICENSE.md) for details.
